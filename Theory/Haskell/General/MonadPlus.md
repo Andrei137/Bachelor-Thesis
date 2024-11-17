@@ -7,6 +7,8 @@ class Monad m => MonadPlus m where
     mplus :: m a -> m a -> m a
 ```
 ### Extra
+```
 guard :: (MonadPlus m) => Bool -> m ()
     guard True = return ()
     guard False = mzero
+```
