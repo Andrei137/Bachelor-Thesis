@@ -82,7 +82,7 @@ B sideA
     = flatten (Prob $ [(C sideA Heads, 1%2), (C sideA Tails, 1%2)])
     = flatten (Prob $ [(Prob [(A[a:=sideA, b:=Heads, c:=Heads], 1%10),
                              (A[a:=sideA, b:=Heads, c:=Tails], 9%10])], 1%2),
-                       Prob [(A[a:=sideA, b:=Tails, c:=Heads], 1%10),
+                       (Prob [(A[a:=sideA, b:=Tails, c:=Heads], 1%10),
                              (A[a:=sideA, b:=Tails, c:=Tails], 9%10)]], 1%2)
     = Prob $ concat $ map multAll [(Prob [(A[a:=sideA, b:=Heads, c:=Heads], 1%10),
                                          (A[a:=sideA, b:=Heads, c:=Tails], 9%10])], 1%2),
