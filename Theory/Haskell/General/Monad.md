@@ -136,7 +136,7 @@ stackManip = push 3 >>= (\_ -> pop >>= (\_ -> pop))
 test = stackManip [5,8,2]
      = push 3 >>= (\_ -> pop >>= (\_ -> pop))
      = (\s -> let (a, s') = push 3 s
-       in (\_ -> pop >>= (\_ -> pop) a s') [5,8,2]
+              in (\_ -> pop >>= (\_ -> pop) a s') [5,8,2]
      = let (a, s') = push 3 [5,8,2]
        in (\_ -> pop >>= (\_ -> pop) a s')
      = let (a, s') = push ((), [3,5,8,2])
@@ -144,7 +144,7 @@ test = stackManip [5,8,2]
      = (\_ -> pop >>= (\_ -> pop) () [3,5,8,2]
      = pop >>= (\_ -> pop) [3,5,8,2]
      = (\s -> let (a, s') = pop s
-       in (\_ -> pop) a s') [3,5,8,2]
+              in (\_ -> pop) a s') [3,5,8,2]
      = let (a, s') = pop [3,5,8,2]
        in (\_ -> pop) a s'
      = let (a, s') = (3, [5,8,2])
