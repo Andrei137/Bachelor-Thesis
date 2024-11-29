@@ -1,0 +1,15 @@
+#### General
+- [Applicative](https://github.com/Andrei137/Bachelor-Thesis/blob/main/theory/haskell/general/applicative.md)
+- [Functor](https://github.com/Andrei137/Bachelor-Thesis/blob/main/theory/haskell/general/functor.md)
+- [Monad](https://github.com/Andrei137/Bachelor-Thesis/blob/main/theory/haskell/general/monad.md)
+- [MonadPlus](https://github.com/Andrei137/Bachelor-Thesis/blob/main/theory/haskell/general/monadplus.md)
+- [Monoids](https://github.com/Andrei137/Bachelor-Thesis/blob/main/theory/haskell/general/monoids.md)
+- [Types](https://github.com/Andrei137/Bachelor-Thesis/blob/main/theory/haskell/general/types.md)
+#### Particular
+- [Either](https://github.com/Andrei137/Bachelor-Thesis/blob/main/theory/haskell/particular/either.md)
+- [Function](https://github.com/Andrei137/Bachelor-Thesis/blob/main/theory/haskell/particular/function.md)
+- [IO](https://github.com/Andrei137/Bachelor-Thesis/blob/main/theory/haskell/particular/io.md)
+- [List](https://github.com/Andrei137/Bachelor-Thesis/blob/main/theory/haskell/particular/list.md)
+- [Maybe](https://github.com/Andrei137/Bachelor-Thesis/blob/main/theory/haskell/particular/maybe.md)
+- [Prob](https://github.com/Andrei137/Bachelor-Thesis/blob/main/theory/haskell/particular/prob.md)
+- [ZipList](https://github.com/Andrei137/Bachelor-Thesis/blob/main/theory/haskell/particular/ziplist.md)
