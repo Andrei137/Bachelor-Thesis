@@ -1,5 +1,5 @@
 ### Haskell
-#### [Markdown Files](https://github.com/Andrei137/Bachelor-Thesis/blob/main/theory/haskell/README.md)
+- [Markdown Files](https://github.com/Andrei137/Bachelor-Thesis/blob/main/theory/haskell/README.md)
 #### Good Monad Explanation
 - https://www.jerf.org/iri/post/2958/
 - https://www.adit.io/posts/2013-04-17-functors,_applicatives,_and_monads_in_pictures.html
