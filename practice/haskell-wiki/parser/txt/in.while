@@ -1,0 +1,21 @@
+x := 10;
+y := 5;
+z := 0;
+
+while x > 0 do
+    if x % 2 == 0 then
+        z := z + 1
+    else
+        y := y + 1
+    end;
+    x := x - 1;
+end;
+
+if z > y then
+    skip
+else
+    y := y * 2
+end;
+
+x = x % 12;
+skip

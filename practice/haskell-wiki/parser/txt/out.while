@@ -1,0 +1,9 @@
+x := n + 5;
+y := -x * 3;
+if x > 5 then
+	y := 1
+else
+	y := 0;
+while x > 0 do
+	x := x - 1;
+skip

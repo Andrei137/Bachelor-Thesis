@@ -1,0 +1,1 @@
+Seq [Assign "x" (ABinary Add (Var "n") (IntConst 5)),Assign "y" (ABinary Multiply (Neg (Var "x")) (IntConst 3)),If (RBinary Greater (Var "x") (IntConst 5)) (Seq [Assign "y" (IntConst 1)]) (Seq [Assign "y" (IntConst 0),While (RBinary Greater (Var "x") (IntConst 0)) (Seq [Assign "x" (ABinary Subtract (Var "x") (IntConst 1)),Skip])])]
