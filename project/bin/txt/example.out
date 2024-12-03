@@ -1,0 +1,14 @@
+x := 18;
+y := 24;
+while (x != y) do
+	if (x > y) then
+		x := x - y;
+		skip
+	else
+		y := y - x;
+		skip
+	end;
+	skip
+end;
+z := x;
+skip

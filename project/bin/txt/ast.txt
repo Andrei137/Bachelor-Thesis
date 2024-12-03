@@ -1,0 +1,20 @@
+Seq [
+    Assign "x" (IntConst 18)
+    Assign "y" (IntConst 24)
+    While RBinary Neq (Var "x") (Var "y")
+        Seq [
+            If RBinary Gt (Var "x") (Var "y")
+                Seq [
+                    Assign "x" (ABinary Sub (Var "x") (Var "y"))
+                    Skip
+                ]
+            Else
+                Seq [
+                    Assign "y" (ABinary Sub (Var "y") (Var "x"))
+                    Skip
+                ]
+            Skip
+        ]
+    Assign "z" (Var "x")
+    Skip
+]
