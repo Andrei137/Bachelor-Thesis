@@ -1,0 +1,8 @@
+read(x);
+read(y);
+while (y != 0) {
+	r := x % y;
+	x := y;
+	y := r;
+}
+print(x);

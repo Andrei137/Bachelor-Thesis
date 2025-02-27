@@ -1,6 +1,6 @@
-name:                project
+name:                surge
 version:             0.1.0.0
-github:              "Andrei137/project"
+github:              "Andrei137/surge"
 license:             BSD-3-Clause
 author:              "Neculae Andrei-Fabian"
 maintainer:          "andrei.fabian188@gmail.com"
@@ -17,12 +17,14 @@ extra-source-files:
 # To avoid duplicated efforts in documentation and dealing with the
 # complications of embedding Haddock markup inside cabal files, it is
 # common to point users to the README.md file.
-description:         Please see the README on GitHub at <https://github.com/Andrei137/project#readme>
+description:         Please see the README on GitHub at <https://github.com/Andrei137/surge#readme>
 
 dependencies:
 - base >= 4.7 && < 5
-- parsec
 - mtl
+- containers
+- filepath
+- split
 
 ghc-options:
 - -Wall
@@ -39,12 +41,12 @@ library:
   source-dirs: src
 
 executables:
-  main:
+  surge:
     main:                Main.hs
-    source-dirs:         app
+    source-dirs:         src
     ghc-options:
     - -threaded
     - -rtsopts
     - -with-rtsopts=-N
     dependencies:
-    - project
+    - surge

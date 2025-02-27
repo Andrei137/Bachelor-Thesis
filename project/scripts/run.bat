@@ -3,8 +3,12 @@ setlocal enabledelayedexpansion
 
 set build=False
 set clear=False
-set pretty=Off
+set file="%1"
+set interpret=
+set prettify=
+set ast=
 
+shift
 :parse_flags
 if "%1"=="" goto end_parse
 set flag=%1
@@ -22,7 +26,11 @@ for /l %%i in (0,1,2) do (
     ) else if "!char!"=="c" (
         set clear=True
     ) else if "!char!"=="p" (
-        set pretty=On
+        set prettify=prettify
+    ) else if "!char!"=="a" (
+        set ast=-ast
+    ) else if "!char!"=="i" (
+        set interpret=run
     ) else (
         goto help_message
     )
@@ -30,8 +38,6 @@ for /l %%i in (0,1,2) do (
 shift
 goto parse_flags
 :end_parse
-
-echo Running the project...
 
 if %build%==True (
     if %clear%==True (
@@ -51,7 +57,7 @@ exit /b 0
 
 :run
 cd ..
-stack exec main %pretty%
+stack exec surge -- %file% %interpret% %prettify% %ast%
 cd scripts
 goto end
 
@@ -61,5 +67,7 @@ echo Param:
 echo  -h     Display this help message
 echo  -b     Build the project
 echo  -c     Clear the console
-echo  -p     Prettify the output
+echo  -i     Interpret the code
+echo  -a     Get the code AST
+echo  -p     Prettify the code
 exit /b
