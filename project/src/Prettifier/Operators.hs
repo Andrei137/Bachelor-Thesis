@@ -9,11 +9,8 @@ module Prettifier.Operators
 
 import AST.Types.Operators
 
-convertBinary :: String -> String -> String -> String
-convertBinary op expr1 expr2 = expr1 ++ " " ++ op ++ " " ++ expr2
-
-convertAssign :: String -> String
-convertAssign var = " " ++ var ++ "= "
+convertBinOp :: String -> String -> String -> String
+convertBinOp op expr1 expr2 = expr1 ++ " " ++ op ++ " " ++ expr2
 
 -- Arithmetic operators
 convertAUnOp :: AUnOp -> String -> String
@@ -22,12 +19,12 @@ convertAUnOp Inc expr = expr ++ "++"
 convertAUnOp Dec expr = expr ++ "--"
 
 convertABinOp :: ABinOp -> String -> String -> String
-convertABinOp Add = convertBinary "+"
-convertABinOp Sub = convertBinary "-"
-convertABinOp Mul = convertBinary "*"
-convertABinOp Div = convertBinary "/"
-convertABinOp Mod = convertBinary "%"
-convertABinOp Pow = convertBinary "**"
+convertABinOp Add = convertBinOp "+"
+convertABinOp Sub = convertBinOp "-"
+convertABinOp Mul = convertBinOp "*"
+convertABinOp Div = convertBinOp "/"
+convertABinOp Mod = convertBinOp "%"
+convertABinOp Pow = convertBinOp "**"
 
 -- Boolean operators
 convertBUnOp :: BUnOp -> String
@@ -47,6 +44,9 @@ convertRBinOp Gt  = ">"
 convertRBinOp Gte = ">="
 
 -- Assignment operators
+convertAssign :: String -> String
+convertAssign var = " " ++ var ++ "= "
+
 convertAssignOp :: AssignOp -> String
 convertAssignOp Basic = convertAssign ":"
 convertAssignOp (With Add) = convertAssign "+"
