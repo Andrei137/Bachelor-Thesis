@@ -53,46 +53,33 @@ library
       src
   ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints
   build-depends:
-      base >=4.7 && <5
+      aeson
+    , aeson-pretty
+    , base >=4.7 && <5
+    , bytestring
     , containers
     , filepath
     , mtl
     , split
+    , text
   default-language: Haskell2010
 
 executable surge
-  main-is: Main.hs
+  main-is: src/Main.hs
   other-modules:
-      AST.Formatter.Core
-      AST.Formatter.Expressions
-      AST.Formatter.Statements
-      AST.Types.Expressions
-      AST.Types.Operators
-      AST.Types.Statements
-      Interpreter.Core
-      Interpreter.Expressions
-      Interpreter.Operators
-      Interpreter.Statements
-      Parser.Core
-      Parser.Expressions
-      Parser.Operators
-      Parser.Primitives
-      Parser.Statements
-      Prettifier.Expressions
-      Prettifier.Operators
-      Prettifier.Statements
-      Utils
       Paths_surge
   autogen-modules:
       Paths_surge
-  hs-source-dirs:
-      src
   ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints -threaded -rtsopts -with-rtsopts=-N
   build-depends:
-      base >=4.7 && <5
+      aeson
+    , aeson-pretty
+    , base >=4.7 && <5
+    , bytestring
     , containers
     , filepath
     , mtl
     , split
     , surge
+    , text
   default-language: Haskell2010

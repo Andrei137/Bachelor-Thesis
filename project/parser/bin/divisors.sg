@@ -10,4 +10,5 @@ for (d := 1; d <= sqrt(x); d += 1) {
             counter += 1;
         }
     }
+}
 print("${x} has ${counter} divisors");

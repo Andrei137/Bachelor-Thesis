@@ -1,5 +1,6 @@
 read(x);
 read(y);
+x += y;
 while (y != 0) {
 	r := x % y;
 	x := y;
