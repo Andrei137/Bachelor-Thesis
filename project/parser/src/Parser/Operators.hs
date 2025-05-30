@@ -1,36 +1,44 @@
 module Parser.Operators
-    ( arithOperatorsTable
-    , boolOperatorsTable
-    , parseRelOp
+    ( operatorsTable
     , parseAssignOp
     ) where
 
 import Control.Applicative
-import AST.Types.Operators
-import AST.Types.Expressions
+import AST.Operators
+import AST.Expressions
 import Parser.Core
 import Parser.Primitives
 
--- Arihtmetic
-parseNeg, parseInc, parseDec :: Parser (AExpr -> AExpr)
-parseNeg = parseOperator "-" $ AUnary Neg
-parseInc = parseOperator "++" $ AUnary Inc
-parseDec = parseOperator "--" $ AUnary Dec
+parseNeg, parseInc, parseDec, parseNot :: Parser (Expr -> Expr)
+parseNeg = parseOperator "-" $ UnaryOp Neg
+parseInc = parseOperator "++" $ UnaryOp Inc
+parseDec = parseOperator "--" $ UnaryOp Dec
+parseNot = parseOperator "!" $ UnaryOp Not
 
-parseAdd, parseSub, parseMul, parseDiv, parseMod, parsePow :: Parser (AExpr -> AExpr -> AExpr)
-parseAdd = parseOperator "+" $ ABinary Add
-parseSub = parseOperator "-" $ ABinary Sub
-parseMul = parseOperator "*" $ ABinary Mul
-parseDiv = parseOperator "/" $ ABinary Div
-parseMod = parseOperator "%" $ ABinary Mod
-parsePow = parseOperator "**" $ ABinary Pow
+parseAdd, parseSub, parseMul, parseDiv, parseMod, parsePow, parseAnd, parseOr,
+  parseEq, parseNeq, parseLte, parseLt, parseGte, parseGt, parseConcat :: Parser (Expr -> Expr -> Expr)
+parseAdd = parseOperator "+" $ BinaryOp Add
+parseSub = parseOperator "-" $ BinaryOp Sub
+parseMul = parseOperator "*" $ BinaryOp Mul
+parseDiv = parseOperator "/" $ BinaryOp Div
+parseMod = parseOperator "%" $ BinaryOp Mod
+parsePow = parseOperator "**" $ BinaryOp Pow
+parseAnd = parseOperator "&&" $ BinaryOp And
+parseOr  = parseOperator "||" $ BinaryOp Or
+parseEq  = parseOperator "==" $ BinaryOp Eq
+parseNeq = parseOperator "!=" $ BinaryOp Neq
+parseLte = parseOperator "<=" $ BinaryOp Lte
+parseLt  = parseOperator "<"  $ BinaryOp Lt
+parseGte = parseOperator ">=" $ BinaryOp Gte
+parseGt  = parseOperator ">"  $ BinaryOp Gt
+parseConcat = parseOperator "." $ BinaryOp Concat
 
-arithOperatorsTable :: OperatorsTable AExpr
-arithOperatorsTable =
-    [ [ Prefix parseNeg
-      ]
-    , [ Postfix parseInc
+operatorsTable :: OperatorsTable Expr
+operatorsTable =
+    [ [ Postfix parseInc
       , Postfix parseDec
+      , Prefix parseNeg
+      , Prefix parseNot
       ]
     , [ Infix RightAssoc parsePow
       ]
@@ -40,40 +48,24 @@ arithOperatorsTable =
       ]
     , [ Infix LeftAssoc parseAdd
       , Infix LeftAssoc parseSub
+      , Infix LeftAssoc parseConcat
       ]
-    ]
-
--- Boolean
-parseNot :: Parser (BExpr -> BExpr)
-parseNot = parseOperator "!" $ BUnary Not
-
-parseAnd, parseOr :: Parser (BExpr -> BExpr -> BExpr)
-parseAnd = parseOperator "&&" $ BBinary And
-parseOr  = parseOperator "||" $ BBinary Or
-
-boolOperatorsTable :: OperatorsTable BExpr
-boolOperatorsTable =
-    [ [ Prefix parseNot
+    , [ Infix LeftAssoc parseLt
+      , Infix LeftAssoc parseLte
+      , Infix LeftAssoc parseGt
+      , Infix LeftAssoc parseGte
+      ]
+    , [ Infix LeftAssoc parseEq
+      , Infix LeftAssoc parseNeq
       ]
     , [ Infix LeftAssoc parseAnd
       , Infix LeftAssoc parseOr
       ]
     ]
 
--- Relational
-parseRelOp :: Parser RBinOp
-parseRelOp
-    =  parseOperator "==" Eq
-   <|> parseOperator "!=" Neq
-   <|> parseOperator "<=" Lte
-   <|> parseOperator "<"  Lt
-   <|> parseOperator ">=" Gte
-   <|> parseOperator ">"  Gt
-
--- Assignment
 parseAssignOp :: Parser AssignOp
 parseAssignOp
-    = parseOperator ":=" (Basic)
+    = parseOperator ":=" Basic
    <|> parseOperator "+=" (With Add)
    <|> parseOperator "-=" (With Sub)
    <|> parseOperator "*=" (With Mul)

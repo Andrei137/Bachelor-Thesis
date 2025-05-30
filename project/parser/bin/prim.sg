@@ -1,12 +1,13 @@
+int x;
 read(x);
 for (d := 2; d <= x; d := d + 1) {
-    for (i := 2; i * i <= d; i := i + 1) {
-        if (d % i == 0) {
-            print("${d} nu e prim");
-            i := d;
-        }
-    }
-    if (i != d + 1) {
-        print("${d} este prim");
-    }
+	for (i := 2; i * i <= d; i := i + 1) {
+		if (d % i == 0) {
+			print("${d} nu e prim");
+			i := d;
+		}
+	}
+	if (i != d + 1) {
+		print("${d} este prim");
+	}
 }

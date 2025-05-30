@@ -54,7 +54,7 @@ instance Alternative Parser where
 expressionParser :: OperatorsTable a -> Parser a -> Parser a
 expressionParser operatorsTable parseTerm = foldl buildParser parseTerm operatorsTable
     where
-        buildParser p ops = foldl (flip applyOp) p ops
+        buildParser = foldl (flip applyOp)
 
         applyOp (Prefix op) p = op <*> p <|> p
         applyOp (Infix LeftAssoc op) p = p `chainl1` op
@@ -76,5 +76,5 @@ expressionParser operatorsTable parseTerm = foldl buildParser parseTerm operator
 parseWith :: Parser a -> String -> Either ParseError a
 parseWith (Parser p) s = case p s of
     Right (a, []) -> Right a
-    Right _ -> Left $ Failure $ "Something went wrong"
+    Right _ -> Left $ Failure "Something went wrong"
     Left e -> Left e

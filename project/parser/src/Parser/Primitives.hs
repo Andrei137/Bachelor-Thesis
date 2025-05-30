@@ -1,5 +1,4 @@
 {-# LANGUAGE LambdaCase #-}
-{-# LANGUAGE TupleSections #-}
 {-# OPTIONS_GHC -Wno-unused-binds #-}
 
 module Parser.Primitives
@@ -7,13 +6,19 @@ module Parser.Primitives
     , parseChar
     , parseStr
     , parseName
-    , parseText
-    , parseNumber
+    , parseIdentifier
+    , parseAnyChar
+    , parseAnyText
+    , parseTextUntil
+    , parseInteger
+    , parseDouble
     , parseBool
     , parseOperator
     , parens
+    , sepBy
     ) where
 
+import Control.Monad
 import Data.Char
 import Control.Applicative
 import Parser.Core
@@ -25,16 +30,8 @@ parseEOF = Parser $ \case
 
 satisfy :: (Char -> Bool) -> Parser Char
 satisfy p = Parser $ \case
-    h:t -> case p h of
-        True -> Right (h, t)
-        False -> Left $ Failure $ "Unexpected character: " ++ [h] ++ " found in " ++ t
+    h:t -> (if p h then Right (h, t) else Left $ Failure $ "Unexpected character: " ++ [h] ++ " found in " ++ t)
     _ -> Left $ Failure "Expected a character but got none"
-
-anyChar :: Parser Char
-anyChar = satisfy (const True)
-
-anyString :: Parser String
-anyString = many anyChar
 
 char :: Char -> Parser Char
 char = satisfy . (==)
@@ -58,17 +55,34 @@ parseChar :: Char -> Parser Char
 parseChar = token . char
 
 parseStr :: String -> Parser ()
-parseStr = fmap (const ()) . token . string
+parseStr = void . token . string
 
 parseName :: Parser String
 parseName = token (some alphaNumChar)
 
-parseText :: Parser String
-parseText = token (parseChar '"' *> many (satisfy (/= '"')) <* parseChar '"')
+parseIdentifier :: String -> Parser String
+parseIdentifier = token . string
 
-parseNumber :: Parser Integer
-parseNumber = parseInteger <$> token (some digitChar)
-    where parseInteger = foldl (\n d -> 10 * n + fromIntegral (ord d - ord '0')) 0
+parseAnyChar :: Parser Char
+parseAnyChar = token (parseChar '\'' *> satisfy (/= '\'') <* parseChar '\'')
+
+parseAnyText :: Parser String
+parseAnyText = token (parseChar '"' *> many (satisfy (/= '"')) <* parseChar '"')
+
+parseTextUntil :: String -> Parser String
+parseTextUntil sep = token (many (satisfy (`notElem` sep)))
+
+parseInteger :: Parser Integer
+parseInteger = parseInteger' <$> token (some digitChar)
+    where parseInteger' = foldl (\n d -> 10 * n + fromIntegral (ord d - ord '0')) 0
+
+parseDouble :: Parser Double
+parseDouble = token $ do
+    whole <- some digitChar
+    (do
+        parseStr "."
+        fractional <- some digitChar
+        return (read (whole ++ "." ++ fractional)))
 
 parseBool :: Parser Bool
 parseBool = token (True <$ parseStr "true" <|> False <$ parseStr "false")
@@ -78,3 +92,12 @@ parseOperator op f = f <$ parseStr op
 
 parens :: Parser a -> Parser a
 parens p = parseChar '(' *> p <* parseChar ')'
+
+sepBy :: Parser a -> String -> Parser [a]
+sepBy p sep = do
+    first <- p
+    rest <- many (do
+                    parseStr sep
+                    p
+                )
+    return (first : rest)

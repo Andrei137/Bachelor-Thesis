@@ -1,0 +1,7 @@
+cradle:
+  stack:
+    - path: "./src"
+      component: "surge:lib"
+
+    - path: "././src/Main.hs"
+      component: "surge:exe:surge"

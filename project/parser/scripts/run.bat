@@ -4,7 +4,7 @@ setlocal enabledelayedexpansion
 set build=False
 set clear=False
 set file="%1"
-set interpret=
+set run=
 set prettify=
 set ast=
 
@@ -28,9 +28,9 @@ for /l %%i in (0,1,2) do (
     ) else if "!char!"=="p" (
         set prettify=prettify
     ) else if "!char!"=="a" (
-        set ast=-ast
+        set ast=ast
     ) else if "!char!"=="i" (
-        set interpret=run
+        set run=run
     ) else (
         goto help_message
     )
@@ -56,9 +56,9 @@ endlocal
 exit /b 0
 
 :run
-cd ..
-stack exec surge -- %file% %interpret% %prettify% %ast%
-cd scripts
+cd ../bin
+stack exec surge -- %interpret% %prettify% %ast% %file%.sg
+cd ../scripts
 goto end
 
 :help_message

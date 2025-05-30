@@ -29,6 +29,13 @@ dependencies:
 - aeson
 - aeson-pretty
 - bytestring
+- warp
+- wai
+- wai-extra
+- aeson
+- bytestring
+- text
+- http-types
 
 ghc-options:
 - -Wall

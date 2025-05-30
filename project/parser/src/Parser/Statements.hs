@@ -3,85 +3,143 @@ module Parser.Statements
     ) where
 
 import Control.Applicative
-import AST.Types.Statements
+import AST.Expressions
+import AST.Statements
 import Parser.Core
+import Parser.Types
 import Parser.Primitives
 import Parser.Operators
 import Parser.Expressions
 
-parseSkip :: Parser Stmt
-parseSkip = parseStr "skip" *> return Skip
+parseComment :: Parser Stmt
+parseComment =
+    parseStr "//" *>
+    ( OneComm <$>
+      parseTextUntil "\n\r"
+    )
 
-parseAssign :: Parser Stmt
-parseAssign = do
-    var <- parseName
-    op <- parseAssignOp
-    expr <- parseArithExpr
-    return $ Assign op var expr
-
-parsePrint :: Parser Stmt
-parsePrint = do
-    parseStr "print"
-    parseStr "("
-    expr <- (String <$> parseText) <|> (AExpr <$> parseArithExpr)
-    parseStr ")"
-    return $ Print expr
+parseMultiComment :: Parser Stmt
+parseMultiComment =
+    parseStr "/*" *>
+    ( MultiComm <$>
+      parseTextUntil "*/" <*
+      parseStr "*/"
+    )
 
 parseRead :: Parser Stmt
-parseRead = do
-    parseStr "read"
-    parseStr "("
-    var <- parseName
-    parseStr ")"
-    return $ Read var
+parseRead = Read <$>
+    ( parseStr "read" *>
+      parens parseName
+    )
+
+parsePrint :: Parser Stmt
+parsePrint = Print <$>
+    ( parseStr "print" *>
+      parens parseExpr
+    )
+
+parseDeclareAssignment :: Parser (Maybe Expr)
+parseDeclareAssignment = optional
+    ( parseStr "{" *>
+      parseExpr <*
+      parseStr "}"
+    )
+
+parseDeclare :: Parser Stmt
+parseDeclare = Declare <$>
+    ( Decl <$>
+      parseType <*>
+      ( do
+        name <- parseName
+        expr <- parseDeclareAssignment
+        return (name, expr)
+      ) `sepBy` ","
+    )
+
+parseAssign :: Parser Stmt
+parseAssign = Assign <$>
+    parseName <*>
+    parseAssignOp <*>
+    parseExpr
 
 parseElse :: Parser Stmt
-parseElse = do
-    parseStr "else"
-    parseBlockWrapped <|> parseBlock
+parseElse = parseStr "else" *> (parseBlockWrapped <|> parseBlock)
 
 parseIf :: Parser Stmt
-parseIf = do
-    cond <- parseCondWrapped "if"
-    stmt1 <- parseBlockWrapped
-    stmt2 <- parseElse <|> pure Skip
-    return $ If cond stmt1 stmt2
+parseIf = If <$>
+    parseCondWrapped "if" <*>
+    parseBlockWrapped <*>
+    optional parseElse
 
 parseWhile :: Parser Stmt
-parseWhile = do
-    cond <- parseCondWrapped "while"
-    stmt <- parseBlockWrapped
-    return $ While cond stmt
+parseWhile = While <$>
+    parseCondWrapped "while" <*>
+    parseBlockWrapped
 
 parseFor :: Parser Stmt
-parseFor = do
-    parseStr "for"
-    parseStr "("
-    initial <- parseSimpleStmt
-    parseStr ";"
-    cond <- parseBoolExpr
-    parseStr ";"
-    update <- parseSimpleStmt
-    parseStr ")"
-    stmt <- parseBlockWrapped
-    return $ For initial cond update stmt
+parseFor =
+    parseStr "for" *>
+    parseStr "(" *>
+    ( For <$>
+      parseSimpleStmt <*
+      parseStr ";" <*>
+      parseExpr <*
+      parseStr ";" <*>
+      parseSimpleStmt <*
+      parseStr ")" <*>
+      parseBlockWrapped
+    )
+
+parseDefArg :: Parser Decl
+parseDefArg = do
+    typ <- parseType
+    name <- parseName
+    expr <- parseDeclareAssignment
+    return $ Decl typ [(name, expr)]
+
+parseDefArgs :: Parser [Decl]
+parseDefArgs = do
+    arg <- parseDefArg
+    args <- (parseStr "," *> parseDefArgs) <|> pure []
+    return (arg : args)
+
+parseFuncDef :: Parser Stmt
+parseFuncDef = FuncDef <$>
+    parseType <*>
+    parseName <*>
+    parens parseDefArgs <*>
+    parseBlockWrapped
+
+parseReturn :: Parser Stmt
+parseReturn = do
+    parseStr "return"
+    expr <- optional parseExpr
+    return $ Return expr
 
 parseSimpleStmt :: Parser Stmt
-parseSimpleStmt =  parseAssign
-               <|> parsePrint
-               <|> parseRead
-               <|> parseSkip
+parseSimpleStmt
+    =  parseAssign
+   <|> parseReturn
+   <|> parseDeclare
+   <|> parsePrint
+   <|> parseRead
+   <|> Continue <$ parseStr "continue"
+   <|> Break <$ parseStr "break"
+   <|> Skip <$ parseStr "skip"
+   <|> Expr <$> parseExpr
 
 parseStmt :: Parser Stmt
-parseStmt =  parseIf
-         <|> parseWhile
-         <|> parseFor
-         <|> (parseSimpleStmt <* parseChar ';')
+parseStmt
+    =  parseIf
+   <|> parseWhile
+   <|> parseFor
+   <|> parseFuncDef
+   <|> parseComment
+   <|> parseMultiComment
+   <|> (parseSimpleStmt <* parseChar ';')
 
 parseBlock :: Parser Stmt
-parseBlock = do
-    stmts <- some parseStmt
-    return $ Seq stmts
+parseBlock = Seq <$> some parseStmt
 
 parseBlockWrapped :: Parser Stmt
 parseBlockWrapped = do
@@ -91,7 +149,9 @@ parseBlockWrapped = do
     return stmt
 
 parseAST :: String -> Either ParseError Stmt
-parseAST = parseWith (do
-    ast <- parseBlock
-    parseEOF
-    return ast)
+parseAST = parseWith
+    ( do
+      ast <- parseBlock
+      parseEOF
+      return ast
+    )

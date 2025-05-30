@@ -1,0 +1,4 @@
+sum(2, 3);
+cout(str);
+abs(3);
+test();

@@ -1,14 +1,15 @@
+int x;
 read(x);
 counter := 0;
 for (d := 1; d <= sqrt(x); d += 1) {
-    if (x % d == 0) {
-        print(d);
-        counter += 1;
-        dd := x / d;
-        if (d != dd) {
-            print(dd);
-            counter += 1;
-        }
-    }
+	if (x % d == 0) {
+		print(d);
+		counter += 1;
+		dd := x / d;
+		if (d != dd) {
+			print(dd);
+			counter += 1;
+		}
+	}
 }
 print("${x} has ${counter} divisors");

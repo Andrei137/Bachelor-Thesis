@@ -1,0 +1,6 @@
+int x;
+read(x);
+int y{ min(x, 13) };
+x += y;
+z := x + y;
+print(sqrt(z));

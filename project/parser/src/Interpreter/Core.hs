@@ -13,7 +13,10 @@ import qualified Data.Map as Map (Map, empty, lookup, insert)
 
 data Value
     = IntVal Integer
+    | DoubleVal Double
     | BoolVal Bool
+    | CharVal Char
+    | StringVal String
     deriving (Show)
 type Env = Map.Map String Value
 type Interpreter = StateT Env IO
@@ -30,7 +33,10 @@ set var val = modify $ Map.insert var val
 
 showValue :: Value -> String
 showValue (IntVal i) = show i
+showValue (DoubleVal d) = show d
 showValue (BoolVal b) = show b
+showValue (CharVal c) = show c
+showValue (StringVal s) = show s
 
 interpretWith :: (a -> Interpreter ()) -> a -> IO ()
 interpretWith evalS s = do

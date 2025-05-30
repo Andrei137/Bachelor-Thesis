@@ -4,37 +4,49 @@ module Interpreter.Operators
     , interpretBUnOp
     , interpretBBinOp
     , interpretRBinOp
+    , isRelational
     ) where
 
-import AST.Types.Operators
+import AST.Operators
 
--- Arithmetic operators
-interpretAUnOp :: AUnOp -> (Integer -> Integer)
+interpretAUnOp :: UnaryOp -> (Integer -> Integer)
 interpretAUnOp Neg = negate
 interpretAUnOp Inc = (+ 1)
 interpretAUnOp Dec = subtract 1
+interpretAUnOp _ = error "Unary operator not supported"
 
-interpretABinOp :: ABinOp -> (Integer -> Integer -> Integer)
+interpretABinOp :: BinaryOp -> (Integer -> Integer -> Integer)
 interpretABinOp Add = (+)
 interpretABinOp Sub = (-)
 interpretABinOp Mul = (*)
 interpretABinOp Div = div
 interpretABinOp Mod = mod
 interpretABinOp Pow = (^)
+interpretABinOp _ = error "Binary operator not supported"
 
--- Boolean operators
-interpretBUnOp :: BUnOp -> (Bool -> Bool)
+interpretBUnOp :: UnaryOp -> (Bool -> Bool)
 interpretBUnOp Not = not
+interpretBUnOp _ = error "Unary boolean operator not supported"
 
-interpretBBinOp :: BBinOp -> (Bool -> Bool -> Bool)
+interpretBBinOp :: BinaryOp -> (Bool -> Bool -> Bool)
 interpretBBinOp And = (&&)
 interpretBBinOp Or = (||)
+interpretBBinOp _ = error "Binary boolean operator not supported"
 
--- Relational operators
-interpretRBinOp :: RBinOp -> (Integer -> Integer -> Bool)
+interpretRBinOp :: BinaryOp -> (Integer -> Integer -> Bool)
 interpretRBinOp Eq  = (==)
 interpretRBinOp Neq = (/=)
 interpretRBinOp Lt  = (<)
 interpretRBinOp Lte = (<=)
 interpretRBinOp Gt  = (>)
 interpretRBinOp Gte = (>=)
+interpretRBinOp _ = error "Relational operator not supported"
+
+isRelational :: BinaryOp -> Bool
+isRelational Eq  = True
+isRelational Neq = True
+isRelational Lt  = True
+isRelational Lte = True
+isRelational Gt  = True
+isRelational Gte = True
+isRelational _ = False
