@@ -1,0 +1,21 @@
+meta {
+  name: AST
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{url}}/ast
+  body: text
+  auth: inherit
+}
+
+body:text {
+  int x{ 12 }, y{ min(12, 13) }, z;
+  read(x);
+  read(y);
+  x += y;
+  z := x + y;
+  print(sqrt(z));
+  
+}

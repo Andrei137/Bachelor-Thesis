@@ -1,31 +1,91 @@
 import * as d3 from 'd3';
 import { useEffect, useRef } from 'react';
 
-const AstVisualizer = ({ astData }) => {
+export default ({ astData }) => {
+  if (astData === null) {
+    return;
+  }
+
   const svgRef = useRef(null);
   const gRef = useRef(null);
+  const zoomRef = useRef(null);
   const colors = {
-    'Read'    : '#FFD166',
-    'Print'   : '#06D6A0',
-    'While'   : '#118AB2',
-    'Assign'  : '#EF476F',
-    'Var'     : '#A2D2FF',
-    'IntConst': '#BDE0FE',
-    'Seq'     : '#8AC926',
-    'Basic'   : '#FFFFFF',
+    'Expr'        : '#4ECDC4',
+    'Read'        : '#FFD166',
+    'Print'       : '#06D6A0',
+    'Declare'     : '#22C3E8',
+    'Assign'      : '#EF476F',
+    'If'          : '#06D6A0',
+    'FuncDef'     : '#FFD166',
+    'Return'      : '#A2D2FF',
+    'Seq'         : '#8AC926',
+    'Invalid code': '#DA0000',
   };
+  const searchRegex = (tag) => {
+    const toColor = (pattern, color) => ({ pattern, color });
+    const regexColors = [
+      toColor(/.*Const$/, '#BDE0FE'),
+      toColor(/(Skip|Break|Continue)/, '#FF6B6B'),
+      toColor(/(While|For)/, '#CCCCCC')
+    ];
+    for (const { pattern, color } of regexColors) {
+      if (pattern.test(tag)) return color;
+    }
+    return null;
+  };
+  const getNodeColor = (tag) => colors[tag] || searchRegex(tag) || '#97C2FC';
 
-  const getNodeColor = (tag) => colors[tag] || '#97C2FC';
+  const fitToBox = () => {
+    if (!svgRef.current || !gRef.current) return;
+
+    const svg = d3.select(svgRef.current);
+    const innerWidth = svgRef.current.clientWidth;
+    const innerHeight = svgRef.current.clientHeight;
+
+    const nodes = d3.select(gRef.current).selectAll('.node').data();
+    if (!nodes || nodes.length === 0) return;
+
+    const xExtent = d3.extent(nodes, (d) => d.x);
+    const yExtent = d3.extent(nodes, (d) => d.y);
+    const treeWidth = xExtent[1] - xExtent[0];
+    const treeHeight = yExtent[1] - yExtent[0];
+
+    const scale = Math.min(
+      innerWidth / Math.max(treeWidth, 1),
+      innerHeight / Math.max(treeHeight, 1)
+    ) * 0.7;
+
+    const translateX = (innerWidth - treeWidth * scale) / 2 - xExtent[0] * scale;
+    const translateY = (innerHeight - treeHeight * scale) / 2 - yExtent[0] * scale;
+
+    if (zoomRef.current) {
+      svg
+        .transition()
+        .duration(500)
+        .call(zoomRef.current.transform, d3.zoomIdentity
+          .translate(translateX, translateY)
+          .scale(scale)
+        );
+    }
+  };
 
   useEffect(() => {
     if (!astData || !svgRef.current) return;
     d3.select(svgRef.current).selectAll('*').remove();
 
-    const innerWidth = svgRef.current.clientWidth - 100;
+    const innerWidth = svgRef.current.clientWidth;
     const innerHeight = svgRef.current.clientHeight;
 
     const processNode = (node) => {
-      if (node === null) return null;
+      if (node === null) return {
+        label: 'null',
+      };
+      if (Array.isArray(node)) {
+        return {
+          label: '[..]',
+          children: node.map(processNode),
+        };
+      }
       if (node.tag) {
         return {
           tag: node.tag,
@@ -59,7 +119,8 @@ const AstVisualizer = ({ astData }) => {
       .attr('height', '100%')
       .style('background-color', '#f8f9fa')
       .style('border', '1px solid #ddd')
-      .style('border-radius', '8px');
+      .style('border-radius', '8px')
+      .style('user-select', 'text');
 
     const group = svg
       .append('g')
@@ -71,7 +132,8 @@ const AstVisualizer = ({ astData }) => {
       .style('opacity', 0)
       .selectAll('text')
       .data(nodes)
-      .enter().append('text')
+      .enter()
+      .append('text')
       .attr('font-size', '12px')
       .text((d) => d.data.label)
       .each(function(d) {
@@ -107,7 +169,14 @@ const AstVisualizer = ({ astData }) => {
       .append('g')
       .attr('class', 'node')
       .attr('transform', (d) => `translate(${d.x}, ${d.y})`)
-      .each(function(d) {
+      .style('cursor', 'text')
+      .on('mousedown', (event) => {
+        event.stopPropagation();
+      })
+      .on('touchstart', (event) => {
+        event.stopPropagation();
+      })
+      .each(function(_) {
         d3.select(this)
           .append('rect')
           .attr('width', (d) => d.data.width)
@@ -126,34 +195,40 @@ const AstVisualizer = ({ astData }) => {
           .attr('text-anchor', 'middle')
           .attr('font-size', '12px')
           .attr('fill', '#333')
+          .style('user-select', 'text')
           .text((d) => d.data.label);
       });
 
-    const xExtent = d3.extent(nodes, (d) => d.x);
-    const yExtent = d3.extent(nodes, (d) => d.y);
-    const treeWidth = xExtent[1] - xExtent[0];
-    const treeHeight = yExtent[1] - yExtent[0];
-    const scale = Math.min(innerWidth / treeWidth, innerHeight / treeHeight);
-    const translateX = (innerWidth - treeWidth * scale) / 2 - xExtent[0] * scale + offset;
-    const translateY = (innerHeight - treeHeight * scale) / 2 - yExtent[0] * scale + offset;
+    gRef.current = group.node();
 
-    const zoom = d3
+    zoomRef.current = d3
       .zoom()
       .scaleExtent([0.1, 8])
+      .filter((event) => {
+        return !event.target.closest || !event.target.closest('.node');
+      })
       .on('zoom', (event) => {
         group.attr('transform', event.transform);
       });
 
-    gRef.current = group.node();
-    svg
-      .call(zoom)
-      .call(zoom.transform, d3
-        .zoomIdentity
-        .translate(translateX, translateY)
-        .scale(scale)
-      );
+    svg.call(zoomRef.current);
+    fitToBox();
 
   }, [astData]);
+
+  useEffect(() => {
+    const resizeObserver = new ResizeObserver(() => {
+      fitToBox();
+    });
+
+    if (svgRef.current) {
+      resizeObserver.observe(svgRef.current);
+    }
+
+    return () => {
+      resizeObserver.disconnect();
+    };
+  }, []);
 
   return (
     <div style={{ width: '100%', height: '100vh' }}>
@@ -161,5 +236,3 @@ const AstVisualizer = ({ astData }) => {
     </div>
   );
 };
-
-export default AstVisualizer;
