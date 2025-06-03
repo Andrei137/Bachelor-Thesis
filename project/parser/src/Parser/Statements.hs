@@ -125,7 +125,6 @@ parseSimpleStmt
    <|> parseRead
    <|> Continue <$ parseStr "continue"
    <|> Break <$ parseStr "break"
-   <|> Skip <$ parseStr "skip"
    <|> Expr <$> parseExpr
 
 parseStmt :: Parser Stmt

@@ -1,3 +1,4 @@
+{-# LANGUAGE LambdaCase #-}
 module Interpreter.Operators
     ( interpretAUnOp
     , interpretABinOp
@@ -10,43 +11,50 @@ module Interpreter.Operators
 import AST.Operators
 
 interpretAUnOp :: UnaryOp -> (Integer -> Integer)
-interpretAUnOp Neg = negate
-interpretAUnOp Inc = (+ 1)
-interpretAUnOp Dec = subtract 1
-interpretAUnOp _ = error "Unary operator not supported"
+interpretAUnOp = \case
+  Neg -> negate
+  Inc -> (+1)
+  Dec -> subtract 1
+  _   -> error "Unary arithmetic operator not supported"
 
 interpretABinOp :: BinaryOp -> (Integer -> Integer -> Integer)
-interpretABinOp Add = (+)
-interpretABinOp Sub = (-)
-interpretABinOp Mul = (*)
-interpretABinOp Div = div
-interpretABinOp Mod = mod
-interpretABinOp Pow = (^)
-interpretABinOp _ = error "Binary operator not supported"
+interpretABinOp = \case
+  Add -> (+)
+  Sub -> (-)
+  Mul -> (*)
+  Div -> div
+  Mod -> mod
+  Pow -> (^)
+  _   -> error "Binary arithmetic operator not supported"
 
 interpretBUnOp :: UnaryOp -> (Bool -> Bool)
-interpretBUnOp Not = not
-interpretBUnOp _ = error "Unary boolean operator not supported"
+interpretBUnOp = \case
+    Not -> not
+    _ -> error "Unary boolean operator Inc not supported"
 
 interpretBBinOp :: BinaryOp -> (Bool -> Bool -> Bool)
-interpretBBinOp And = (&&)
-interpretBBinOp Or = (||)
-interpretBBinOp _ = error "Binary boolean operator not supported"
+interpretBBinOp = \case
+  And -> (&&)
+  Or  -> (||)
+  _   -> error "Binary boolean operator not supported"
 
 interpretRBinOp :: BinaryOp -> (Integer -> Integer -> Bool)
-interpretRBinOp Eq  = (==)
-interpretRBinOp Neq = (/=)
-interpretRBinOp Lt  = (<)
-interpretRBinOp Lte = (<=)
-interpretRBinOp Gt  = (>)
-interpretRBinOp Gte = (>=)
-interpretRBinOp _ = error "Relational operator not supported"
+interpretRBinOp = \case
+  Eq  -> (==)
+  Neq -> (/=)
+  Lt  -> (<)
+  Lte -> (<=)
+  Gt  -> (>)
+  Gte -> (>=)
+  _   -> error "Relational operator not supported"
 
 isRelational :: BinaryOp -> Bool
-isRelational Eq  = True
-isRelational Neq = True
-isRelational Lt  = True
-isRelational Lte = True
-isRelational Gt  = True
-isRelational Gte = True
-isRelational _ = False
+isRelational = \case
+  Eq  -> True
+  Neq -> True
+  Lt  -> True
+  Lte -> True
+  Gt  -> True
+  Gte -> True
+  _ -> False
+

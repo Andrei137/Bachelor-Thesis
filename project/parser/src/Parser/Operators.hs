@@ -50,13 +50,12 @@ operatorsTable =
       , Infix LeftAssoc parseSub
       , Infix LeftAssoc parseConcat
       ]
-    , [ Infix LeftAssoc parseLt
+    , [ Infix LeftAssoc parseEq
+      , Infix LeftAssoc parseNeq
+      , Infix LeftAssoc parseLt
       , Infix LeftAssoc parseLte
       , Infix LeftAssoc parseGt
       , Infix LeftAssoc parseGte
-      ]
-    , [ Infix LeftAssoc parseEq
-      , Infix LeftAssoc parseNeq
       ]
     , [ Infix LeftAssoc parseAnd
       , Infix LeftAssoc parseOr
@@ -72,3 +71,4 @@ parseAssignOp
    <|> parseOperator "/=" (With Div)
    <|> parseOperator "%=" (With Mod)
    <|> parseOperator "**=" (With Pow)
+   <|> parseOperator ".=" (With Concat)

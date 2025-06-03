@@ -25,7 +25,6 @@ defaultValue StringT = StringVal ""
 defaultValue _ = error "Unsupported type for default value"
 
 interpretStmt :: Stmt -> Interpreter ()
-interpretStmt Skip = return ()
 interpretStmt (OneComm _) = return ()
 interpretStmt (MultiComm _) = return ()
 interpretStmt (Expr expr) = void $ interpretExpr expr

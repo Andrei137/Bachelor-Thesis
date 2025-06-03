@@ -36,7 +36,7 @@ showValue (IntVal i) = show i
 showValue (DoubleVal d) = show d
 showValue (BoolVal b) = show b
 showValue (CharVal c) = show c
-showValue (StringVal s) = show s
+showValue (StringVal s) = s
 
 interpretWith :: (a -> Interpreter ()) -> a -> IO ()
 interpretWith evalS s = do

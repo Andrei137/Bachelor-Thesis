@@ -19,7 +19,6 @@ addSep = map addSemicolon
       | otherwise = stmt ++ ";"
 
 convertStmt :: Stmt -> String
-convertStmt Skip = "skip"
 convertStmt Break = "break"
 convertStmt Continue = "continue"
 convertStmt (OneComm comm) = "// " ++ comm

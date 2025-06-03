@@ -18,8 +18,7 @@ data Decl
     deriving (Show, Eq, Generic)
 
 data Stmt
-    = Skip
-    | Break
+    = Break
     | Continue
     | OneComm String
     | MultiComm String
@@ -55,9 +54,6 @@ instance ToJSON Decl where
         ]
 
 instance ToJSON Stmt where
-    toJSON Skip = object
-        [fromString "tag" .= ("Skip" :: String)
-        ]
     toJSON Break = object
         [fromString "tag" .= ("Break" :: String)
         ]
