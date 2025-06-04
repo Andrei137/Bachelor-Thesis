@@ -1,11 +1,13 @@
 module Parser.Expressions
-    ( parseCondWrapped
+    ( parseDeclareAssignment
+    , parseCondWrapped
     , parseExpr
     ) where
 
 import Control.Applicative
 import AST.Expressions
 import Parser.Core
+import Parser.Types
 import Parser.Primitives
 import Parser.Operators
 
@@ -18,11 +20,35 @@ parseCustomFuncCall = parseCustomFuncCall' ["sqrt", "log", "max", "min", "floor"
         parseCustomFuncCall' [] = empty
         parseCustomFuncCall' (f:fs) = (parseIdentifier f >>= parseFuncCall) <|> parseCustomFuncCall' fs
 
+parseDeclareAssignment :: Parser (Maybe Expr)
+parseDeclareAssignment = optional
+    ( parseStr "{" *>
+      parseExpr <*
+      parseStr "}"
+    )
+
+parseDeclare :: Parser Expr
+parseDeclare = Declare <$>
+    parseType <*>
+    ( do
+      name <- parseName
+      expr <- parseDeclareAssignment
+      return (name, expr)
+    ) `sepBy` ","
+
+parseAssign :: Parser Expr
+parseAssign = Assign <$>
+    parseName <*>
+    parseAssignOp <*>
+    parseExpr
+
 parseTerm :: Parser Expr
 parseTerm
     =  parens parseExpr
    <|> (parseName >>= parseFuncCall)
    <|> parseCustomFuncCall
+   <|> parseDeclare
+   <|> parseAssign
    <|> DoubleConst <$> parseDouble
    <|> IntConst <$> parseInteger
    <|> BoolConst <$> parseBool

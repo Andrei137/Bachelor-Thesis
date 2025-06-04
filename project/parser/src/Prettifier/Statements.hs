@@ -4,7 +4,6 @@ module Prettifier.Statements
 
 import Data.List (isPrefixOf, intercalate)
 import Prettifier.Types
-import Prettifier.Operators
 import Prettifier.Expressions
 import AST.Statements
 
@@ -26,12 +25,6 @@ convertStmt (MultiComm comm) = "/* " ++ comm ++ " */"
 convertStmt (Expr expr) = convertExpr expr
 convertStmt (Read var) = "read(" ++ var ++ ")"
 convertStmt (Print expr) = "print(" ++ convertExpr expr ++ ")"
-convertStmt (Declare (Decl typ vars)) =
-    convertType typ ++ " " ++ intercalate ", " (map convertVar vars)
-  where
-    convertVar (name, Nothing) = name
-    convertVar (name, Just expr) = name ++ "{ " ++ convertExpr expr ++ " }"
-convertStmt (Assign var op expr) = var ++ convertAssignOp op ++ convertExpr expr
 convertStmt (If cond stmt1 Nothing) =
     "if (" ++ convertExpr cond ++ ") {\n" ++
     indent (convertStmt stmt1) ++
@@ -50,17 +43,18 @@ convertStmt (While cond stmt) =
     indent (convertStmt stmt) ++
     "}"
 convertStmt (For initial cond post stmt) =
-    "for (" ++ convertStmt initial ++ "; " ++
+    "for (" ++ convertExpr initial ++ "; " ++
     convertExpr cond ++ "; " ++
-    convertStmt post ++ ") {\n" ++
+    convertExpr post ++ ") {\n" ++
     indent (convertStmt stmt) ++ "}"
 convertStmt (FuncDef retType name params body) =
     convertType retType ++ " " ++ name ++ "(" ++
-    intercalate ", " (concatMap convertParam params) ++ ") {\n" ++
+    intercalate ", " (map convertParam params) ++ ") {\n" ++
     indent (convertStmt body) ++
     "}"
   where
-    convertParam (Decl t vars) = map (\(n, _) -> convertType t ++ " " ++ n) vars
+    convertParam (typ, name', Nothing) = convertType typ ++ " " ++ name'
+    convertParam (typ, name', Just expr) =convertType typ ++ " " ++ name' ++ " = " ++ convertExpr expr
 convertStmt (Return Nothing) = "return;"
 convertStmt (Return (Just expr)) = "return " ++ convertExpr expr ++ ";"
 convertStmt (Seq stmts) = unlines $ addSep (map convertStmt stmts)

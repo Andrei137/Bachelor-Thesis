@@ -9,20 +9,9 @@ import Data.Char (toLower)
 import Data.List.Split (splitOn)
 import System.IO (hFlush, stdout)
 import Control.Monad.State (liftIO)
-import AST.Types
-import AST.Operators
 import AST.Statements
 import Interpreter.Core
-import Interpreter.Operators
 import Interpreter.Expressions
-
-defaultValue :: Type -> Value
-defaultValue IntT = IntVal 0
-defaultValue DoubleT = DoubleVal 0.0
-defaultValue BoolT = BoolVal False
-defaultValue CharT = CharVal '\0'
-defaultValue StringT = StringVal ""
-defaultValue _ = error "Unsupported type for default value"
 
 interpretStmt :: Stmt -> Interpreter ()
 interpretStmt (OneComm _) = return ()
@@ -64,28 +53,6 @@ interpretStmt (Print expr) = do
                         ) rest
                     liftIO $ putStrLn ""
         _ -> liftIO $ putStrLn (showValue expr')
-interpretStmt (Declare (Decl typ vars)) = do
-    forM_ vars $ \(name, maybeExpr) -> do
-        case maybeExpr of
-            Nothing -> set name $ defaultValue typ
-            Just expr -> do
-                value <- interpretExpr expr
-                case value of
-                    IntVal _ | typ == IntT -> set name value
-                    DoubleVal _ | typ == DoubleT -> set name value
-                    BoolVal _ | typ == BoolT -> set name value
-                    CharVal _ | typ == CharT -> set name value
-                    StringVal _ | typ == StringT -> set name value
-                    _ -> error "Type error in declaration"
-interpretStmt (Assign var op expr) = do
-    value <- interpretExpr expr
-    case op of
-        Basic -> set var value
-        (With binaryOp) -> do
-            oldValue <- find var
-            case (oldValue, value) of
-                (IntVal i1, IntVal i2) -> set var $ IntVal (interpretABinOp binaryOp i1 i2)
-                _ -> error "Type error, expected integer"
 interpretStmt (If cond stmt1 Nothing) = do
     value <- interpretExpr cond
     case value of
@@ -105,8 +72,8 @@ interpretStmt (While cond stmt) = do
         BoolVal False -> return ()
         _ -> error "Type error, expected boolean"
 interpretStmt (For initial cond update stmt) = do
-    interpretStmt initial
-    interpretStmt (While cond (Seq [stmt, update]))
+    _ <- interpretExpr initial
+    interpretStmt (While cond (Seq [stmt, Expr update]))
 interpretStmt (Seq stmts) = mapM_ interpretStmt stmts
 interpretStmt _ = error "Not handled yet"
 

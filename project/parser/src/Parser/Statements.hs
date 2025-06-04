@@ -3,12 +3,12 @@ module Parser.Statements
     ) where
 
 import Control.Applicative
+import AST.Types
 import AST.Expressions
 import AST.Statements
 import Parser.Core
 import Parser.Types
 import Parser.Primitives
-import Parser.Operators
 import Parser.Expressions
 
 parseComment :: Parser Stmt
@@ -38,30 +38,6 @@ parsePrint = Print <$>
       parens parseExpr
     )
 
-parseDeclareAssignment :: Parser (Maybe Expr)
-parseDeclareAssignment = optional
-    ( parseStr "{" *>
-      parseExpr <*
-      parseStr "}"
-    )
-
-parseDeclare :: Parser Stmt
-parseDeclare = Declare <$>
-    ( Decl <$>
-      parseType <*>
-      ( do
-        name <- parseName
-        expr <- parseDeclareAssignment
-        return (name, expr)
-      ) `sepBy` ","
-    )
-
-parseAssign :: Parser Stmt
-parseAssign = Assign <$>
-    parseName <*>
-    parseAssignOp <*>
-    parseExpr
-
 parseElse :: Parser Stmt
 parseElse = parseStr "else" *> (parseBlockWrapped <|> parseBlock)
 
@@ -81,23 +57,23 @@ parseFor =
     parseStr "for" *>
     parseStr "(" *>
     ( For <$>
-      parseSimpleStmt <*
+      parseExpr <*
       parseStr ";" <*>
       parseExpr <*
       parseStr ";" <*>
-      parseSimpleStmt <*
+      parseExpr <*
       parseStr ")" <*>
       parseBlockWrapped
     )
 
-parseDefArg :: Parser Decl
+parseDefArg :: Parser (Type, String, Maybe Expr)
 parseDefArg = do
     typ <- parseType
     name <- parseName
     expr <- parseDeclareAssignment
-    return $ Decl typ [(name, expr)]
+    return (typ , name, expr)
 
-parseDefArgs :: Parser [Decl]
+parseDefArgs :: Parser [(Type, String, Maybe Expr)]
 parseDefArgs = do
     arg <- parseDefArg
     args <- (parseStr "," *> parseDefArgs) <|> pure []
@@ -118,9 +94,7 @@ parseReturn = do
 
 parseSimpleStmt :: Parser Stmt
 parseSimpleStmt
-    =  parseAssign
-   <|> parseReturn
-   <|> parseDeclare
+    =  parseReturn
    <|> parsePrint
    <|> parseRead
    <|> Continue <$ parseStr "continue"

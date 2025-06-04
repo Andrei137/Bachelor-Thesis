@@ -5,7 +5,9 @@ module Interpreter.Expressions
     ) where
 
 import GHC.Base (when)
-import Control.Monad (forM)
+import Control.Monad (forM, forM_)
+import AST.Types
+import AST.Operators
 import AST.Expressions
 import Interpreter.Core
 import Interpreter.Operators
@@ -44,6 +46,14 @@ anyFunc name f params = do
         isInt (IntVal _) = True
         isInt _ = False
 
+defaultValue :: Type -> Value
+defaultValue IntT = IntVal 0
+defaultValue DoubleT = DoubleVal 0.0
+defaultValue BoolT = BoolVal False
+defaultValue CharT = CharVal '\0'
+defaultValue StringT = StringVal ""
+defaultValue _ = error "Unsupported type for default value"
+
 interpretExpr :: Expr -> Interpreter Value
 interpretExpr (Var var) = find var
 interpretExpr (FuncCall func params) = case func of
@@ -76,3 +86,28 @@ interpretExpr (BinaryOp op expr1 expr2) = do
                 else return $ IntVal $ interpretABinOp op i1 i2
         (BoolVal b1, BoolVal b2) -> return $ BoolVal $ interpretBBinOp op b1 b2
         _ -> error "Type error, expected integers"
+interpretExpr (Declare typ vars) = do
+    forM_ vars $ \(name, maybeExpr) ->
+        ( do case maybeExpr of
+                Nothing -> set name $ defaultValue typ
+                Just expr -> do
+                    value <- interpretExpr expr
+                    case value of
+                        IntVal _ | typ == IntT -> set name value
+                        DoubleVal _ | typ == DoubleT -> set name value
+                        BoolVal _ | typ == BoolT -> set name value
+                        CharVal _ | typ == CharT -> set name value
+                        StringVal _ | typ == StringT -> set name value
+                        _ -> error "Type error in declaration"
+        )
+    return $ defaultValue typ
+interpretExpr (Assign var op expr) = do
+    value <- interpretExpr expr
+    case op of
+        Basic -> set var value
+        (With binaryOp) -> do
+            oldValue <- find var
+            case (oldValue, value) of
+                (IntVal i1, IntVal i2) -> set var $ IntVal (interpretABinOp binaryOp i1 i2)
+                _ -> error "Type error, expected integer"
+    return value

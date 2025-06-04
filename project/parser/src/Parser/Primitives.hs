@@ -94,10 +94,13 @@ parens :: Parser a -> Parser a
 parens p = parseChar '(' *> p <* parseChar ')'
 
 sepBy :: Parser a -> String -> Parser [a]
-sepBy p sep = do
-    first <- p
-    rest <- many (do
-                    parseStr sep
-                    p
-                )
-    return (first : rest)
+sepBy p sep =
+    (do
+        first <- p
+        rest <- many (do
+            parseStr sep
+            p
+          )
+        return (first : rest)
+    )
+    <|> return []

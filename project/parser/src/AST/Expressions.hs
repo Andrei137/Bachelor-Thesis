@@ -8,6 +8,7 @@ module AST.Expressions
 import GHC.Generics (Generic)
 import Data.Aeson (ToJSON(..), object, (.=))
 import Data.Aeson.Key (fromString)
+import AST.Types
 import AST.Operators
 
 data Expr
@@ -20,6 +21,8 @@ data Expr
     | StringConst String
     | UnaryOp UnaryOp Expr
     | BinaryOp BinaryOp Expr Expr
+    | Declare Type [(String, Maybe Expr)]
+    | Assign String AssignOp Expr
     deriving (Show, Eq, Generic)
 
 instance ToJSON Expr where
@@ -58,4 +61,24 @@ instance ToJSON Expr where
     toJSON (BinaryOp op e1 e2) = object
         [ fromString "contents" .= [toJSON op, toJSON e1, toJSON e2]
         , fromString "tag" .= ("BinaryOp" :: String)
+        ]
+    toJSON (Declare typ []) = object
+        [ fromString "contents" .= [toJSON typ]
+        , fromString "tag" .= ("Declare" :: String)
+        ]
+    toJSON (Declare name [(typ, Nothing)]) = object
+        [ fromString "contents" .= [toJSON name, toJSON typ]
+        , fromString "tag" .= ("Declare" :: String)
+        ]
+    toJSON (Declare name [(typ, Just expr)]) = object
+        [ fromString "contents" .= [toJSON name, toJSON typ, toJSON expr]
+        , fromString "tag" .= ("Declare" :: String)
+        ]
+    toJSON (Declare name (x:xs)) = object
+        [ fromString "contents" .= (toJSON name : toJSON x : map toJSON xs)
+        , fromString "tag" .= ("Declare" :: String)
+        ]
+    toJSON (Assign op var expr) = object
+        [ fromString "contents" .= [toJSON op, toJSON var, toJSON expr]
+        , fromString "tag" .= ("Assign" :: String)
         ]

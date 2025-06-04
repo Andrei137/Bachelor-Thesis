@@ -25,7 +25,7 @@ export default ({ astData }) => {
     const toColor = (pattern, color) => ({ pattern, color });
     const regexColors = [
       toColor(/.*Const$/, '#BDE0FE'),
-      toColor(/(Skip|Break|Continue)/, '#FF6B6B'),
+      toColor(/(Break|Continue)/, '#FF6B6B'),
       toColor(/(While|For)/, '#CCCCCC')
     ];
     for (const { pattern, color } of regexColors) {
