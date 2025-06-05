@@ -39,8 +39,11 @@ char = satisfy . (==)
 string :: String -> Parser String
 string = traverse char
 
-alphaNumChar :: Parser Char
-alphaNumChar = satisfy isAlphaNum
+alphaChar :: Parser Char
+alphaChar = satisfy isAlpha
+
+identifierChar :: Parser Char
+identifierChar = satisfy (\c -> isAlphaNum c || c == '_')
 
 digitChar :: Parser Char
 digitChar = satisfy isDigit
@@ -58,7 +61,10 @@ parseStr :: String -> Parser ()
 parseStr = void . token . string
 
 parseName :: Parser String
-parseName = token (some alphaNumChar)
+parseName = token $ do
+    first <- alphaChar
+    rest <- many identifierChar
+    return (first : rest)
 
 parseIdentifier :: String -> Parser String
 parseIdentifier = token . string

@@ -22,7 +22,7 @@ parseSub = parseOperator "-" $ BinaryOp Sub
 parseMul = parseOperator "*" $ BinaryOp Mul
 parseDiv = parseOperator "/" $ BinaryOp Div
 parseMod = parseOperator "%" $ BinaryOp Mod
-parsePow = parseOperator "**" $ BinaryOp Pow
+parsePow = parseOperator "^" $ BinaryOp Pow
 parseAnd = parseOperator "&&" $ BinaryOp And
 parseOr  = parseOperator "||" $ BinaryOp Or
 parseEq  = parseOperator "==" $ BinaryOp Eq
