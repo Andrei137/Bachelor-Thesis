@@ -3,12 +3,14 @@ module Interpreter.Core
     , Env
     , Interpreter
     , find
+    , optionalFind
     , set
     , showValue
     , interpretWith
+    , typeMatches
     ) where
 
-import Control.Monad.State (StateT, runStateT, get, modify)
+import Control.Monad.State (StateT, runStateT, get, gets, modify)
 import qualified Data.Map as Map (Map, empty, lookup, insert)
 
 data Value
@@ -29,6 +31,9 @@ find var = do
         Just v -> return v
         Nothing -> error $ "Variable " ++ var ++ " not found"
 
+optionalFind :: String -> Interpreter (Maybe Value)
+optionalFind var = gets (Map.lookup var)
+
 set :: String -> Value -> Interpreter ()
 set var val = modify $ Map.insert var val
 
@@ -39,6 +44,15 @@ showValue (BoolVal b) = show b
 showValue (CharVal c) = show c
 showValue (StringVal s) = s
 showValue VoidVal = ""
+
+typeMatches :: Value -> Value -> Bool
+typeMatches (IntVal _) (IntVal _) = True
+typeMatches (DoubleVal _) (DoubleVal _) = True
+typeMatches (BoolVal _) (BoolVal _) = True
+typeMatches (CharVal _) (CharVal _) = True
+typeMatches (StringVal _) (StringVal _) = True
+typeMatches VoidVal VoidVal = True
+typeMatches _ _ = False
 
 interpretWith :: (a -> Interpreter ()) -> a -> IO ()
 interpretWith evalS s = do

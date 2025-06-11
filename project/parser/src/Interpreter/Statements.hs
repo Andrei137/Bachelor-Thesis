@@ -12,6 +12,8 @@ import Control.Monad.State (liftIO)
 import AST.Statements
 import Interpreter.Core
 import Interpreter.Expressions
+import Parser.Core
+import Parser.Expressions
 
 interpretStmt :: Stmt -> Interpreter ()
 interpretStmt (OneComm _) = return ()
@@ -37,6 +39,7 @@ interpretStmt (Read var) = do
             [c] -> set var (CharVal c)
             _ -> error $ var ++ " is char, got " ++ input
         StringVal _ -> set var (StringVal input)
+        VoidVal -> error $ var ++ " is void, cannot read value"
 interpretStmt (Print expr) = do
     expr' <- interpretExpr expr
     case expr' of
@@ -47,9 +50,15 @@ interpretStmt (Print expr) = do
                 (first:rest) -> do
                     liftIO $ putStr first
                     mapM_ (\part -> do
-                        let (var:rest') = splitOn "}" part
-                        value <- find var
-                        liftIO $ putStr (showValue value ++ concat rest')
+                        let (exprStr : rest') = splitOn "}" part
+                        case parseWith parseExpr exprStr of
+                            Left err ->
+                                liftIO $ putStrLn $ "Parse error: " ++
+                                show err
+                            Right parsedExpr -> do
+                                value <- interpretExpr parsedExpr
+                                liftIO $ putStr
+                                    (showValue value ++ concat rest')
                         ) rest
                     liftIO $ putStrLn ""
         _ -> liftIO $ putStrLn (showValue expr')

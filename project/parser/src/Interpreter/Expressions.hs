@@ -84,19 +84,39 @@ interpretExpr (Declare typ vars) = do
                 Just expr -> do
                     value <- interpretExpr expr
                     case value of
-                        IntVal _ | typ == IntT -> set name value
-                        DoubleVal _ | typ == DoubleT -> set name value
-                        BoolVal _ | typ == BoolT -> set name value
-                        CharVal _ | typ == CharT -> set name value
-                        StringVal _ | typ == StringT -> set name value
+                        IntVal _ | typ == IntT ->
+                            set name value
+                        IntVal i | typ == DoubleT ->
+                            set name $ DoubleVal $ fromIntegral i
+                        DoubleVal _ | typ == DoubleT ->
+                            set name value
+                        DoubleVal d | typ == IntT ->
+                            set name $ IntVal $ round d
+                        BoolVal _ | typ == BoolT ->
+                            set name value
+                        CharVal _ | typ == CharT ->
+                            set name value
+                        StringVal _ | typ == StringT ->
+                            set name value
                         _ -> error "Type error in declaration"
         )
     return VoidVal
 interpretExpr (Assign var op expr) = do
     value <- interpretExpr expr
     case op of
-        Basic -> set var value
+        Basic -> do
+            mOldValue <- optionalFind var
+            case mOldValue of
+                Just oldValue ->
+                    if typeMatches oldValue value
+                        then set var value
+                        else error "Type mismatch in assignment"
+                Nothing -> set var value
+            set var value
         (With binaryOp) -> do
             oldValue <- find var
-            set var $ interpretBinaryOp binaryOp oldValue value
+            let newValue = interpretBinaryOp binaryOp oldValue value
+            if typeMatches oldValue newValue
+                then set var newValue
+                else error "Type mismatch in assignment"
     return VoidVal
