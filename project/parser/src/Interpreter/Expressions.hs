@@ -72,20 +72,11 @@ interpretExpr (CharConst c) = return $ CharVal c
 interpretExpr (StringConst s) = return $ StringVal s
 interpretExpr (UnaryOp op expr) = do
     value <- interpretExpr expr
-    case value of
-        IntVal i -> return $ IntVal $ interpretAUnOp op i
-        BoolVal b -> return $ BoolVal $ interpretBUnOp op b
-        _ -> error "Type error, expected integer or boolean"
+    return $ interpretUnaryOp op value
 interpretExpr (BinaryOp op expr1 expr2) = do
     value1 <- interpretExpr expr1
     value2 <- interpretExpr expr2
-    case (value1, value2) of
-        (IntVal i1, IntVal i2) ->
-            if isRelational op
-                then return $ BoolVal $ interpretRBinOp op i1 i2
-                else return $ IntVal $ interpretABinOp op i1 i2
-        (BoolVal b1, BoolVal b2) -> return $ BoolVal $ interpretBBinOp op b1 b2
-        _ -> error "Type error, expected integers"
+    return $ interpretBinaryOp op value1 value2
 interpretExpr (Declare typ vars) = do
     forM_ vars $ \(name, maybeExpr) ->
         ( do case maybeExpr of
@@ -100,14 +91,12 @@ interpretExpr (Declare typ vars) = do
                         StringVal _ | typ == StringT -> set name value
                         _ -> error "Type error in declaration"
         )
-    return $ defaultValue typ
+    return VoidVal
 interpretExpr (Assign var op expr) = do
     value <- interpretExpr expr
     case op of
         Basic -> set var value
         (With binaryOp) -> do
             oldValue <- find var
-            case (oldValue, value) of
-                (IntVal i1, IntVal i2) -> set var $ IntVal (interpretABinOp binaryOp i1 i2)
-                _ -> error "Type error, expected integer"
-    return value
+            set var $ interpretBinaryOp binaryOp oldValue value
+    return VoidVal

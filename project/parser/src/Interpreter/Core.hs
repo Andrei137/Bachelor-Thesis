@@ -17,6 +17,7 @@ data Value
     | BoolVal Bool
     | CharVal Char
     | StringVal String
+    | VoidVal
     deriving (Show)
 type Env = Map.Map String Value
 type Interpreter = StateT Env IO
@@ -37,6 +38,7 @@ showValue (DoubleVal d) = show d
 showValue (BoolVal b) = show b
 showValue (CharVal c) = show c
 showValue (StringVal s) = s
+showValue VoidVal = ""
 
 interpretWith :: (a -> Interpreter ()) -> a -> IO ()
 interpretWith evalS s = do
