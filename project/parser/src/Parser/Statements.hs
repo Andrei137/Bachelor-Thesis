@@ -115,11 +115,7 @@ parseBlock :: Parser Stmt
 parseBlock = Seq <$> some parseStmt
 
 parseBlockWrapped :: Parser Stmt
-parseBlockWrapped = do
-    parseStr "{"
-    stmt <- parseBlock
-    parseStr "}"
-    return stmt
+parseBlockWrapped = Seq <$> (parseStr "{" *> some parseStmt <* parseStr "}")
 
 parseAST :: String -> Either ParseError Stmt
 parseAST = parseWith

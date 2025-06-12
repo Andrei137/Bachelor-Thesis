@@ -47,8 +47,6 @@ parseTerm
     =  parens parseExpr
    <|> (parseName >>= parseFuncCall)
    <|> parseCustomFuncCall
-   <|> parseDeclare
-   <|> parseAssign
    <|> DoubleConst <$> parseDouble
    <|> IntConst <$> parseInteger
    <|> BoolConst <$> parseBool
@@ -57,9 +55,10 @@ parseTerm
    <|> Var <$> parseName
 
 parseExpr :: Parser Expr
-parseExpr = expressionParser operatorsTable parseTerm
+parseExpr
+    =  parseDeclare
+   <|> parseAssign
+   <|> expressionParser operatorsTable parseTerm
 
 parseCondWrapped :: String -> Parser Expr
-parseCondWrapped s = do
-    parseStr s
-    parens parseExpr
+parseCondWrapped s = parseStr s *> parens parseExpr

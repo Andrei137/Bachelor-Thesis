@@ -13,7 +13,6 @@ module Parser.Primitives
     , parseInteger
     , parseDouble
     , parseBool
-    , parseOperator
     , parens
     , sepBy
     ) where
@@ -92,9 +91,6 @@ parseDouble = token $ do
 
 parseBool :: Parser Bool
 parseBool = token (True <$ parseStr "true" <|> False <$ parseStr "false")
-
-parseOperator :: String -> a -> Parser a
-parseOperator op f = f <$ parseStr op
 
 parens :: Parser a -> Parser a
 parens p = parseChar '(' *> p <* parseChar ')'

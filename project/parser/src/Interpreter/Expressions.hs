@@ -119,4 +119,4 @@ interpretExpr (Assign var op expr) = do
             if typeMatches oldValue newValue
                 then set var newValue
                 else error "Type mismatch in assignment"
-    return VoidVal
+    return value

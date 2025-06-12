@@ -3,6 +3,7 @@ module Parser.Operators
     , parseAssignOp
     ) where
 
+import Data.Functor
 import Control.Applicative
 import AST.Operators
 import AST.Expressions
@@ -10,28 +11,28 @@ import Parser.Core
 import Parser.Primitives
 
 parseNeg, parseInc, parseDec, parseNot :: Parser (Expr -> Expr)
-parseNeg = parseOperator "-" $ UnaryOp Neg
-parseInc = parseOperator "++" $ UnaryOp Inc
-parseDec = parseOperator "--" $ UnaryOp Dec
-parseNot = parseOperator "!" $ UnaryOp Not
+parseNeg = parseStr "-" $> UnaryOp Neg
+parseInc = parseStr "++" $> UnaryOp Inc
+parseDec = parseStr "--" $> UnaryOp Dec
+parseNot = parseStr "!" $> UnaryOp Not
 
 parseAdd, parseSub, parseMul, parseDiv, parseMod, parsePow, parseAnd, parseOr,
   parseEq, parseNeq, parseLte, parseLt, parseGte, parseGt, parseConcat :: Parser (Expr -> Expr -> Expr)
-parseAdd = parseOperator "+" $ BinaryOp Add
-parseSub = parseOperator "-" $ BinaryOp Sub
-parseMul = parseOperator "*" $ BinaryOp Mul
-parseDiv = parseOperator "/" $ BinaryOp Div
-parseMod = parseOperator "%" $ BinaryOp Mod
-parsePow = parseOperator "^" $ BinaryOp Pow
-parseAnd = parseOperator "&&" $ BinaryOp And
-parseOr  = parseOperator "||" $ BinaryOp Or
-parseEq  = parseOperator "==" $ BinaryOp Eq
-parseNeq = parseOperator "!=" $ BinaryOp Neq
-parseLte = parseOperator "<=" $ BinaryOp Lte
-parseLt  = parseOperator "<"  $ BinaryOp Lt
-parseGte = parseOperator ">=" $ BinaryOp Gte
-parseGt  = parseOperator ">"  $ BinaryOp Gt
-parseConcat = parseOperator "." $ BinaryOp Concat
+parseAdd = parseStr "+" $> BinaryOp Add
+parseSub = parseStr "-" $> BinaryOp Sub
+parseMul = parseStr "*" $> BinaryOp Mul
+parseDiv = parseStr "/" $> BinaryOp Div
+parseMod = parseStr "%" $> BinaryOp Mod
+parsePow = parseStr "^" $> BinaryOp Pow
+parseAnd = parseStr "&&" $> BinaryOp And
+parseOr  = parseStr "||" $> BinaryOp Or
+parseEq  = parseStr "==" $> BinaryOp Eq
+parseNeq = parseStr "!=" $> BinaryOp Neq
+parseLte = parseStr "<=" $> BinaryOp Lte
+parseLt  = parseStr "<"  $> BinaryOp Lt
+parseGte = parseStr ">=" $> BinaryOp Gte
+parseGt  = parseStr ">"  $> BinaryOp Gt
+parseConcat = parseStr "." $> BinaryOp Concat
 
 operatorsTable :: OperatorsTable Expr
 operatorsTable =
@@ -64,11 +65,11 @@ operatorsTable =
 
 parseAssignOp :: Parser AssignOp
 parseAssignOp
-    = parseOperator ":=" Basic
-   <|> parseOperator "+=" (With Add)
-   <|> parseOperator "-=" (With Sub)
-   <|> parseOperator "*=" (With Mul)
-   <|> parseOperator "/=" (With Div)
-   <|> parseOperator "%=" (With Mod)
-   <|> parseOperator "**=" (With Pow)
-   <|> parseOperator ".=" (With Concat)
+    = parseStr ":=" $> Basic
+   <|> parseStr "+=" $> With Add
+   <|> parseStr "-=" $> With Sub
+   <|> parseStr "*=" $> With Mul
+   <|> parseStr "/=" $> With Div
+   <|> parseStr "%=" $> With Mod
+   <|> parseStr "**=" $> With Pow
+   <|> parseStr ".=" $> With Concat
